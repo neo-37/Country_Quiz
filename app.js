@@ -171,7 +171,7 @@ app.post("/register", function (req, res) {
       .then(() => {
         console.log("register done");
         console.log(req.body.email)
-        res.cookie("cookieName", req.body.email,{ expires: new Date(Date.now() + 900000),secure:true});
+        res.cookie("cookieName", req.body.email,{ expires: new Date(Date.now() + 900000),httpOnly:false,sameSite:"none",secure:true});
         res.send(true)
       })
       .catch((err) => {console.log(err),res.send(false)});
@@ -195,8 +195,7 @@ app.post("/login", function (req, res) {
           if (result === true) {
             console.log("login compare success");
             // saving the data to the cookies
-            res.cookie("cookieName", req.body.email);
-
+            res.cookie("cookieName", req.body.email,{ expires: new Date(Date.now() + 900000),httpOnly:false,sameSite:"none",secure:true});
             res.send(true);
           }
         });
@@ -227,23 +226,9 @@ app.get("/is_logged", function (req, res) {
   }
 });
 
-app.get("/is_linked", function (req, res) {
-  console.log(
-    "cookie check in is_linked get rt",
-    req.cookies,
-    req.cookies.cookieName
-  );
-  if (req.cookies.cookieName != null) {
-    res.send(true);
-  } else {
-    res.send(false);
-  }
-});
-
 app.get("/is_admin", function (req, res) {
   console.log(
     "cookie check in is_admin get rt",
-    req,
     req.cookies,
     req.cookies.cookieName
   );
