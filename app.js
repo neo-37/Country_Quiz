@@ -209,7 +209,7 @@ app.post("/login", function (req, res) {
 
 app.get("/logout", function (req, res) {
   console.log("logout get rt");
-  res.clearCookie("cookieName");
+  res.clearCookie("cookieName",{httpOnly:false,sameSite:"none",secure:true});
   res.end();
 });
 
