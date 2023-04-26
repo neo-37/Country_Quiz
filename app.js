@@ -26,15 +26,15 @@ app.use(
     credentials: true,
   })
 );
-app.use(function (req, res, next) {
-  res.header("Content-Type", "application/json;charset=UTF-8");
-  res.header("Access-Control-Allow-Credentials", true);
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
+// app.use(function (req, res, next) {
+//   res.header("Content-Type", "application/json;charset=UTF-8");
+//   res.header("Access-Control-Allow-Credentials", true);
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
 
 app.use(cookieParser());
 
@@ -103,7 +103,6 @@ app.get("/all_user_stats", (req, res) => {
       users.sort(function (a, b) {
         return a.time - b.time;
       }); //if positive value is returned then swap a,b})
-      console.log(users);
       res.send(users);
     })
     .catch((err) => {
@@ -173,17 +172,10 @@ app.post("/register", function (req, res) {
       .then(() => {
         console.log("register done");
         console.log(req.body.email);
-        res.cookie("cookieName", req.body.email, {
-          domain: process.env.FRONTEND_DOMAIN,
-          expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
-          httpOnly:false,
-          sameSite: "none",
-          secure: true,
-        });
-        res.send(true);
+        res.send({ puzzle_cookie: req.body.email,check:true });
       })
       .catch((err) => {
-        console.log(err), res.send(false);
+        console.log(err), res.send({check:true});
       });
   });
 });
@@ -197,25 +189,27 @@ app.post("/login", function (req, res) {
     email: username,
   })
     .then((foundUser) => {
-      if (foundUser) {
+      if (foundUser)//as if not match is found then findOne return null 
+      {
         bcrypt.compare(password, foundUser.password, function (err, result) {
           console.log("login compare working", result);
           if (result === true) {
             console.log("login compare success");
             // saving the data to the cookies
-            res.cookie("cookieName", req.body.email, {
-              domain: process.env.FRONTEND_DOMAIN,
-              expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
-              httpOnly:false,
-              sameSite: "none",
-              secure: true,
-            });
-            res.send(true);
+            res.send({ puzzle_cookie: req.body.email ,check:true});
+            // res.cookie("cookieName", req.body.email, {
+            //   domain: process.env.FRONTEND_DOMAIN,
+            //   expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
+            //   httpOnly:false,
+            //   sameSite: "none",
+            //   secure: true,
+            // });
+         
           }
         });
       } else {
         console.log("no match");
-        res.send(false);
+        res.send({check:false});
       }
     })
     .catch((err) => console.log(err));
@@ -223,22 +217,30 @@ app.post("/login", function (req, res) {
 
 app.get("/logout", function (req, res) {
   console.log("logout get rt");
-  res.clearCookie("cookieName", {
-    domain: process.env.FRONTEND_DOMAIN,
-    sameSite: "none",
-    secure: true,
-  });
-  res.end();
+  // res.clearCookie("cookieName", {
+  //   domain: process.env.FRONTEND_DOMAIN,
+  //   sameSite: "none",
+  //   secure: true,
+  // });
+  res.send('user logged out');
 });
 
 app.get("/is_logged", function (req, res) {
   console.log(
     "cookie check in is_logged get rt",
     req.cookies,
-    req.cookies.cookieName
+    req.cookies.puzzle_cookie
   );
-  if (req.cookies.cookieName != null) {
-    res.send(true);
+  if (req.cookies.puzzle_cookie != null) {
+    User.findOne({
+      email: req.cookies.puzzle_cookie,
+    }).then((foundUser) => {
+      if (foundUser) {
+        res.send(true);
+      } else {
+        res.send(false);
+      }
+    });
   } else {
     res.send(false);
   }
@@ -248,9 +250,9 @@ app.get("/is_admin", function (req, res) {
   console.log(
     "cookie check in is_admin get rt",
     req.cookies,
-    req.cookies.cookieName
+    req.cookies.puzzle_cookie
   );
-  if (req.cookies.cookieName == "vivekranjan4256@gmail.com") {
+  if (req.cookies.puzzle_cookie === "vivekranjan4256@gmail.com") {
     res.send(true);
   } else {
     res.send(false);
