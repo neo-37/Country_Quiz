@@ -3,9 +3,8 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const cookieSession = require("cookie-session");
+const cookieParser=require('cookie-parser')
 
 const saltRounds = 10; //just should be above where it is used,not necessarily here
 
@@ -26,6 +25,9 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(cookieParser());//cookie parse is needed to parse the cookies,don't omit
+
 // app.use(function (req, res, next) {
 //   res.header("Content-Type", "application/json;charset=UTF-8");
 //   res.header("Access-Control-Allow-Credentials", true);
@@ -35,16 +37,6 @@ app.use(
 //   );
 //   next();
 // });
-
-app.use(cookieParser());
-
-// app.use(
-//   cookieSession({
-//     name: "session",
-//     keys: ["eltimus"],
-//     maxAge: 24 * 60 * 60 * 1000, //1day
-//   })
-// );
 
 //"mongodb://127.0.0.1:27017/elitmusDB"
 mongoose
@@ -172,10 +164,10 @@ app.post("/register", function (req, res) {
       .then(() => {
         console.log("register done");
         console.log(req.body.email);
-        res.send({ puzzle_cookie: req.body.email,check:true });
+        res.send({ puzzle_cookie: req.body.email, check: true });
       })
       .catch((err) => {
-        console.log(err), res.send({check:true});
+        console.log(err), res.send({ check: true });
       });
   });
 });
@@ -189,14 +181,14 @@ app.post("/login", function (req, res) {
     email: username,
   })
     .then((foundUser) => {
-      if (foundUser)//as if not match is found then findOne return null 
-      {
+      if (foundUser) {
+        //as if not match is found then findOne return null
         bcrypt.compare(password, foundUser.password, function (err, result) {
           console.log("login compare working", result);
           if (result === true) {
             console.log("login compare success");
             // saving the data to the cookies
-            res.send({ puzzle_cookie: req.body.email ,check:true});
+            res.send({ puzzle_cookie: req.body.email, check: true });
             // res.cookie("cookieName", req.body.email, {
             //   domain: process.env.FRONTEND_DOMAIN,
             //   expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
@@ -204,12 +196,11 @@ app.post("/login", function (req, res) {
             //   sameSite: "none",
             //   secure: true,
             // });
-         
           }
         });
       } else {
         console.log("no match");
-        res.send({check:false});
+        res.send({ check: false });
       }
     })
     .catch((err) => console.log(err));
@@ -222,16 +213,16 @@ app.get("/logout", function (req, res) {
   //   sameSite: "none",
   //   secure: true,
   // });
-  res.send('user logged out');
+  res.send("user logged out");
 });
 
 app.get("/is_logged", function (req, res) {
   console.log(
     "cookie check in is_logged get rt",
     req.cookies,
-    req.cookies.puzzle_cookie
+    req.cookies?req.cookies.puzzle_cookie:"no such cookie present"
   );
-  if (req.cookies.puzzle_cookie != null) {
+  if (req.cookies) {
     User.findOne({
       email: req.cookies.puzzle_cookie,
     }).then((foundUser) => {
@@ -250,12 +241,24 @@ app.get("/is_admin", function (req, res) {
   console.log(
     "cookie check in is_admin get rt",
     req.cookies,
-    req.cookies.puzzle_cookie
+    req.cookies?req.cookies.puzzle_cookie:"no such cookie present"
   );
-  if (req.cookies.puzzle_cookie === "vivekranjan4256@gmail.com") {
-    res.send(true);
-  } else {
-    res.send(false);
+  if (req.cookies) {
+    User.findOne({
+      email: req.cookies.puzzle_cookie,
+    }).then((foundUser) => {
+      if (foundUser) {
+        {
+          if (req.cookies.puzzle_cookie === "vivekranjan4256@gmail.com") {
+            res.send(true);
+          } else {
+            res.send(false);
+          }
+        }
+      } else {
+        res.send(false);
+      }
+    });
   }
 });
 
