@@ -28,16 +28,6 @@ app.use(
 
 app.use(cookieParser());//cookie parse is needed to parse the cookies,don't omit
 
-// app.use(function (req, res, next) {
-//   res.header("Content-Type", "application/json;charset=UTF-8");
-//   res.header("Access-Control-Allow-Credentials", true);
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept"
-//   );
-//   next();
-// });
-
 //"mongodb://127.0.0.1:27017/elitmusDB"
 mongoose
   .connect(process.env.MONGO_URI)
@@ -81,10 +71,6 @@ app.get("/", function (req, res) {
   res.send("home route");
 });
 
-app.get("/", function (req, res) {
-  res.end();
-});
-
 app.get("/register", function (req, res) {
   res.end();
 });
@@ -116,22 +102,22 @@ app.post("/user_stats", async (req, res) => {
   console.log(typeof percentage_accuracy);
   console.log({ time: total_time, accuracy: percentage_accuracy });
 
-  let mail = req.cookies.cookieName;
+  let mail = req.body.puzzle_cookie;
   console.log(typeof mail);
-  await User.find({ email: mail }).then((users) => {
+  User.find({ email: mail }).then(async (users) => {
     console.log(users[0].name);
-    Player.findOne({ email: mail }).then((found) => {
+  await Player.findOne({ email: mail }).then(async (found) => {
       if (found === null) {
-        Player.create({
+        await Player.create({
           email: mail,
           time: total_time,
           accuracy: percentage_accuracy,
           name: users[0].name,
         })
-          .then((nuser) => console.log("create", nuser))
+          .then((nuser) => {console.log("create", nuser)})
           .catch((err) => console.log("create err", err));
       } else {
-        Player.findOneAndReplace(
+        await Player.findOneAndReplace(
           { email: mail },
           {
             email: mail,
@@ -140,13 +126,14 @@ app.post("/user_stats", async (req, res) => {
             name: users[0].name,
           }
         )
-          .then((nuser) =>
+          .then((nuser) =>{
             console.log("replace returns the old document", nuser)
+          }
           )
           .catch((err) => console.log("find one and replace err", err));
       }
     });
-    res.send({ email: mail, total_time, accuracy: percentage_accuracy });
+    res.send({ email: mail, time:total_time, accuracy: percentage_accuracy });
   });
 });
 
@@ -189,13 +176,6 @@ app.post("/login", function (req, res) {
             console.log("login compare success");
             // saving the data to the cookies
             res.send({ puzzle_cookie: req.body.email, check: true });
-            // res.cookie("cookieName", req.body.email, {
-            //   domain: process.env.FRONTEND_DOMAIN,
-            //   expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
-            //   httpOnly:false,
-            //   sameSite: "none",
-            //   secure: true,
-            // });
           }
         });
       } else {
@@ -208,23 +188,16 @@ app.post("/login", function (req, res) {
 
 app.get("/logout", function (req, res) {
   console.log("logout get rt");
-  // res.clearCookie("cookieName", {
-  //   domain: process.env.FRONTEND_DOMAIN,
-  //   sameSite: "none",
-  //   secure: true,
-  // });
   res.send("user logged out");
 });
 
-app.get("/is_logged", function (req, res) {
+app.post("/is_logged", function (req, res) {
   console.log(
-    "cookie check in is_logged get rt",
-    req.cookies,
-    req.cookies?req.cookies.puzzle_cookie:"no such cookie present"
+    "is_logged get rt",req.body
   );
-  if (req.cookies) {
+  if (req.body.cookie_present) {
     User.findOne({
-      email: req.cookies.puzzle_cookie,
+      email: req.body.puzzle_cookie,
     }).then((foundUser) => {
       if (foundUser) {
         res.send(true);
@@ -237,19 +210,18 @@ app.get("/is_logged", function (req, res) {
   }
 });
 
-app.get("/is_admin", function (req, res) {
+app.post("/is_admin", function (req, res) {
   console.log(
     "cookie check in is_admin get rt",
-    req.cookies,
-    req.cookies?req.cookies.puzzle_cookie:"no such cookie present"
+     req.body
   );
-  if (req.cookies) {
+  if (req.body.cookie_present) {
     User.findOne({
-      email: req.cookies.puzzle_cookie,
+      email: req.body.puzzle_cookie,
     }).then((foundUser) => {
       if (foundUser) {
         {
-          if (req.cookies.puzzle_cookie === "vivekranjan4256@gmail.com") {
+          if (req.body.puzzle_cookie === "vivekranjan4256@gmail.com") {
             res.send(true);
           } else {
             res.send(false);
