@@ -18,12 +18,15 @@ app.use(
 );
 app.use(express.json());
 
+//cors will be needed even after proxy but hopefully not for cookie 
 app.use(
-  cors({
+  cors(
+    {
     origin: process.env.FRONTEND_URI,
     methods: "GET,POST,PUT,DELETE,OPTIONS",
     credentials: true,
-  })
+  }
+  )
 );
 
 app.use(cookieParser());//cookie parse is needed to parse the cookies,don't omit
@@ -77,19 +80,19 @@ const playerSchema = new mongoose.Schema({
 
 const Player = mongoose.model("Player", playerSchema);
 
-app.get("/", function (req, res) {
+app.get("/api", function (req, res) {
   res.send("home route");
 });
 
-app.get("/", function (req, res) {
+app.get("/api", function (req, res) {
   res.end();
 });
 
-app.get("/register", function (req, res) {
+app.get("/api/register", function (req, res) {
   res.end();
 });
 
-app.get("/all_user_stats", (req, res) => {
+app.get("/api/all_user_stats", (req, res) => {
   Player.find()
     .then((users) => {
       users.sort(function (a, b) {
@@ -102,7 +105,7 @@ app.get("/all_user_stats", (req, res) => {
     });
 });
 
-app.post("/user_stats", async (req, res) => {
+app.post("/api/user_stats", async (req, res) => {
   console.log("user_stats post rt", req.body);
   const tiar = req.body.time_ar;
   let total_time = 0;
@@ -150,7 +153,7 @@ app.post("/user_stats", async (req, res) => {
   });
 });
 
-app.post("/register", function (req, res) {
+app.post("/api/register", function (req, res) {
   console.log("register post rt", req.body);
   bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
     const newUser = new User({
@@ -167,12 +170,13 @@ app.post("/register", function (req, res) {
         res.send({ puzzle_cookie: req.body.email, check: true });
       })
       .catch((err) => {
-        console.log(err), res.send({ check: true });
+        console.log(err);
+         res.send({ check: false });
       });
   });
 });
 
-app.post("/login", function (req, res) {
+app.post("/api/login", function (req, res) {
   console.log("login post rt", req.body);
   const username = req.body.email;
   const password = req.body.password;
@@ -190,7 +194,6 @@ app.post("/login", function (req, res) {
             // saving the data to the cookies
             res.send({ puzzle_cookie: req.body.email, check: true });
             // res.cookie("cookieName", req.body.email, {
-            //   domain: process.env.FRONTEND_DOMAIN,
             //   expires: new Date(Date.now() + 2 * 60 * 60 * 1000),
             //   httpOnly:false,
             //   sameSite: "none",
@@ -206,21 +209,21 @@ app.post("/login", function (req, res) {
     .catch((err) => console.log(err));
 });
 
-app.get("/logout", function (req, res) {
+app.get("/api/logout", function (req, res) {
   console.log("logout get rt");
   // res.clearCookie("cookieName", {
-  //   domain: process.env.FRONTEND_DOMAIN,
+  //   httpOnly:false,
   //   sameSite: "none",
   //   secure: true,
   // });
   res.send("user logged out");
 });
 
-app.get("/is_logged", function (req, res) {
+app.get("/api/is_logged", function (req, res) {
   console.log(
     "cookie check in is_logged get rt",
     req.cookies,
-    req.cookies?req.cookies.puzzle_cookie:"no such cookie present"
+    req.cookies.puzzle_cookie
   );
   if (req.cookies) {
     User.findOne({
@@ -237,11 +240,11 @@ app.get("/is_logged", function (req, res) {
   }
 });
 
-app.get("/is_admin", function (req, res) {
+app.get("/api/is_admin", function (req, res) {
   console.log(
     "cookie check in is_admin get rt",
     req.cookies,
-    req.cookies?req.cookies.puzzle_cookie:"no such cookie present"
+    req.cookies.puzzle_cookie
   );
   if (req.cookies) {
     User.findOne({
