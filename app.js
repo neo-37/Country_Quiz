@@ -18,12 +18,15 @@ app.use(
 );
 app.use(express.json());
 
+//cors will be needed even after proxy but hopefully not for cookie 
 app.use(
-  cors({
+  cors(
+    {
     origin: process.env.FRONTEND_URI,
     methods: "GET,POST,PUT,DELETE,OPTIONS",
     credentials: true,
-  })
+  }
+  )
 );
 
 app.use(cookieParser());//cookie parse is needed to parse the cookies,don't omit
@@ -154,7 +157,8 @@ app.post("/register", function (req, res) {
         res.send({ puzzle_cookie: req.body.email, check: true });
       })
       .catch((err) => {
-        console.log(err), res.send({ check: true });
+        console.log(err);
+         res.send({ check: false });
       });
   });
 });
