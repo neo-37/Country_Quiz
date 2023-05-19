@@ -12,9 +12,9 @@ function Rules({ startButton }) {
           </div>
 
           <div className="card-body">
-            <p className="card-text">1. There are 12 levels in the game.</p>
+            <p className="card-text">1. There are 12 levels in this game.</p>
             <p className="card-text">
-              2. Answer of all these levels are name of the country.
+              2. Answer to all the levels is name of a country.
             </p>
             <p className="card-text">
               3. Click on Start Exploring on the next page to start the game.
@@ -37,8 +37,7 @@ function Rules({ startButton }) {
               8. If your guess is correct you will move to the next level.
             </p>
             <p className="card-text">
-              9. Upon moving to the next level go the country which you guessed
-              in google map which contains hint for next country.
+              9. To get hint for the next country, select the answer for previous level on google earth.
             </p>
             <p className="card-text">
               10. Complete all the levels to win the game.

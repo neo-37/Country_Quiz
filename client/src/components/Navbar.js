@@ -35,7 +35,7 @@ function Navbar({ verified, loggedin, setVerified, setloggedin }) {
             className="navbar-brand"
             style={{ fontFamily: "Oswald, sans-serif", fontSize: "35px" }}
           >
-            🏴‍☠️🎯
+            🗺️🔍
           </h1>
 
           <button
@@ -69,11 +69,25 @@ function Navbar({ verified, loggedin, setVerified, setloggedin }) {
 
             <div className="offcanvas-body">
               <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
-                <li className="nav-item" data-bs-dismiss="offcanvas">
+                {/* <li className="nav-item" data-bs-dismiss="offcanvas">
                   <Link to="/about" className="nav-link">
                     About
                   </Link>
-                </li>
+                </li> */}
+                {loggedin ? (
+                  <li className="nav-item" data-bs-dismiss="offcanvas">
+                    <Link to="/play" className="nav-link">
+                      Play
+                    </Link>
+                  </li>
+                ) : (
+                  <li className="nav-item" data-bs-dismiss="offcanvas">
+                    <Link to="/" className="nav-link">
+                      Home
+                    </Link>
+                  </li>
+                )}
+
                 {verified ? (
                   <li className="nav-item" data-bs-dismiss="offcanvas">
                     <Link to="/admin" className="nav-link">
@@ -83,11 +97,6 @@ function Navbar({ verified, loggedin, setVerified, setloggedin }) {
                 ) : (
                   <></>
                 )}
-                <li className="nav-item" data-bs-dismiss="offcanvas">
-                  <Link to="/" className="nav-link">
-                    Home
-                  </Link>
-                </li>
 
                 {loggedin ? (
                   <li className="nav-item" data-bs-dismiss="offcanvas">
