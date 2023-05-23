@@ -10,7 +10,7 @@ console.log('Game win box',curUserFinalStats)
     const [rank,setrank]=useState(-1)
   setTimeout(() => {
     setShowConfetti(false);
-  }, 10 * 1000);
+  }, 15 * 1000);
 
   useEffect(()=>{
     axios

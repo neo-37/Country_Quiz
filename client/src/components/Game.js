@@ -28,11 +28,14 @@ function Game({ showFinalStats, setCurUserFinalStats }) {
 
   const timeRef = useRef(0);
   const totalTimeRef = useRef(0);
-  //const intervalRef = useRef(null);
   const timePassedRef = useRef([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
+  //FUpdate: start timer only once start exploring has been clicked
   //const startTimerRef=useRef(false);
 
+  //FUpdate: we have met with a issue that needs major work around, browsers throttle javascript when tab is not in focus to conserver resources
+  //so the timer will either run very slowly and even stop if inactive for extended period,this can be solve by using Web Wrokers API in javascript,
+  //but using it with react can need some extra steps,so will solve this in future update
   //correct way to run a timer as cleanup is imp
   useEffect(() => {
     // setinterval returns an id of the timer so that we can use the id to stop it after we are done
@@ -47,7 +50,8 @@ function Game({ showFinalStats, setCurUserFinalStats }) {
   //cannot be directly controlled using async/await syntax. This is because React batches state updates for performance reasons,
   //and therefore, the state updates may not be immediately reflected.
   useEffect(() => {
-    if (currentInputIndex < 12) inputRefs.current[currentInputIndex].focus();
+    if (currentInputIndex !== 12 && currentInputIndex !== 0)
+      inputRefs.current[currentInputIndex].focus();
 
     console.log("attempts", attempts);
     //this is how we can make use of async await inside function which directly don't support them
@@ -58,6 +62,7 @@ function Game({ showFinalStats, setCurUserFinalStats }) {
       }
     };
     send_and_show_stats();
+    // eslint-disable-next-line
   }, [attempts, currentInputIndex]);
   //IMP:This way, the logic that relies on the updated state values will be executed after the state has been updated correctly,
   //addressing the issue you encountered.
