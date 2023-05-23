@@ -15,6 +15,8 @@ function GamePage({ setVerified, setloggedin }) {
 
   const handleStartButton = (e) => {
     setShowGame(true);
+    // window.scrollTo({top: 0, left: 0, behavior: 'smooth'});
+    window.scrollTo(0,0);
   };
 
   const showFinalStats = () => {

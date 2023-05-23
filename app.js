@@ -93,12 +93,8 @@ app.get("/all_user_stats", (req, res) => {
 
 app.post("/user_stats", async (req, res) => {
   console.log("user_stats post rt", req.body);
-  const tiar = req.body.time_ar;
-  let total_time = 0;
-  for (let i = 0; i < tiar.length; i += 1) total_time += tiar[i];
-  total_time = Number(total_time.toFixed(3));
   const atar = req.body.attempts_ar;
-  let total_attemps = 0;
+  let total_attemps = 0,total_time=req.body.total_time;
   for (let i = 0; i < atar.length; i += 1) total_attemps += atar[i];
   let percentage_accuracy = (12 / total_attemps) * 100;
   percentage_accuracy = Number(percentage_accuracy.toFixed(2));

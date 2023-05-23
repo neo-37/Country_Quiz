@@ -53,7 +53,6 @@ function Navbar({ verified, loggedin, setVerified, setloggedin }) {
             tabIndex={-1}
             id="offcanvasDarkNavbar"
             aria-labelledby="offcanvasDarkNavbarLabel"
-            style={{ maxWidth: "15%" }}
           >
             <div className="offcanvas-header">
               <h5 className="offcanvas-title" id="offcanvasDarkNavbarLabel">

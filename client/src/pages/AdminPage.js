@@ -37,7 +37,7 @@ function AdminPage() {
   };
 
   return (
-    <>
+    <div>
       <table className="table" style={{color:"black",fontSize:"2rem"}}>
         <thead>
           <tr>
@@ -62,7 +62,7 @@ function AdminPage() {
           })}
         </tbody>
       </table>
-    </>
+    </div>
   );
 }
 export default AdminPage;

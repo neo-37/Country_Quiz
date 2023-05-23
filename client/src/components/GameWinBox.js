@@ -16,7 +16,7 @@ console.log('Game win box',curUserFinalStats)
     axios
     .get(process.env.REACT_APP_BACKEND_URI + "/all_user_stats")
     .then((resp) => {
-      let rk=(resp.data).findIndex(user=>user.email==curUserFinalStats.email)
+      let rk=(resp.data).findIndex(user=>user.email===curUserFinalStats.email)
       //console.log("all user stats resp winbox", resp.data,rk+1);
       setrank(rk+1)
     })

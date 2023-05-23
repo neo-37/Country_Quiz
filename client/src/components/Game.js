@@ -3,27 +3,15 @@ import { useState, useRef, useEffect } from "react";
 import "../styles.css";
 import axios from "axios";
 import Cookies from "js-cookie";
+
 function Game({ showFinalStats, setCurUserFinalStats }) {
-  const [names, setNames] = useState([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
+  const nameRef = useRef(["", "", "", "", "", "", "", "", "", "", "", ""]);
   const [attempts, setAttempts] = useState([
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   ]);
   const [currentInputIndex, setCurrentInputIndex] = useState(0);
   const inputRefs = useRef([]);
-  const [arr, setArr] = useState([
+  const arr = [
     "Mongolia",
     "Germany",
     "New Zealand",
@@ -36,93 +24,90 @@ function Game({ showFinalStats, setCurUserFinalStats }) {
     "Egypt",
     "China",
     "India",
-  ]);
+  ];
 
-  const [time, setTime] = useState(null);
-  const [now, setNow] = useState(null);
-  const intervalRef = useRef(null);
-  const [timePassed, setTimePassed] = useState([
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  ]);
-  const [gameOver, setGameOver] = useState(false);
+  const timeRef = useRef(0);
+  const totalTimeRef = useRef(0);
+  //const intervalRef = useRef(null);
+  const timePassedRef = useRef([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-  const handleStart = () => {
-    setTime(Date.now());
-    setNow(Date.now());
-    intervalRef.current = setInterval(() => {
-      setTime(Date.now());
-    }, 10);
-  };
+  //const startTimerRef=useRef(false);
 
-  const handleStop = () => {
-    clearInterval(intervalRef.current);
-  };
-
+  //correct way to run a timer as cleanup is imp
   useEffect(() => {
-    inputRefs.current[0].focus();
+    // setinterval returns an id of the timer so that we can use the id to stop it after we are done
+    const intervalId = setInterval(() => {
+      //c hold he the value of totalTime,using totalTime in set state is not suggested
+      totalTimeRef.current = totalTimeRef.current + 0.01;
+    }, 10);
+    return () => clearInterval(intervalId); //cleanup function provided by useEffect can be used to clear the timer with the help of clearInteval method
   }, []);
+
+  //IMP:The setState function in React, including setAttempts in your case, does not work synchronously and
+  //cannot be directly controlled using async/await syntax. This is because React batches state updates for performance reasons,
+  //and therefore, the state updates may not be immediately reflected.
+  useEffect(() => {
+    if (currentInputIndex < 12) inputRefs.current[currentInputIndex].focus();
+
+    console.log("attempts", attempts);
+    //this is how we can make use of async await inside function which directly don't support them
+    const send_and_show_stats = async () => {
+      if (currentInputIndex === 2) {
+        await send_user_stats(); //without await here rank 1 is shown as rank zero as finals stats need this data to match from database,then update and show
+        showFinalStats();
+      }
+    };
+    send_and_show_stats();
+  }, [attempts, currentInputIndex]);
+  //IMP:This way, the logic that relies on the updated state values will be executed after the state has been updated correctly,
+  //addressing the issue you encountered.
 
   const send_user_stats = async () => {
     await axios
-      .post(
-        process.env.REACT_APP_BACKEND_URI + "/user_stats",
-        {puzzle_cookie:Cookies.get('puzzle_cookie'), time_ar: timePassed, attempts_ar: attempts }
-      )
+      .post(process.env.REACT_APP_BACKEND_URI + "/user_stats", {
+        puzzle_cookie: Cookies.get("puzzle_cookie"),
+        total_time: Number(totalTimeRef.current.toFixed(2)),
+        attempts_ar: attempts,
+      })
       .then((res) => {
-        console.log('send_user_stats',res.data)
+        //processed user stats received from server
+        console.log("sent_user_stats", res.data);
         setCurUserFinalStats(res.data);
       })
       .catch((err) => {
         console.log("send_user_stats fn in Game", err);
       });
   };
+
   const handleKeyDown = async (event, index) => {
     if (event.key === "Enter") {
-      event.preventDefault();
-      // console.log(arr[index]);
-      if ((event.target.value).toLowerCase() === (arr[index]).toLocaleLowerCase()) {
-        timePassed[index] = (time - now) / 1000;
-        handleStop();
-        if (index === 11) {
-          setGameOver(true);
-          await send_user_stats();
-          showFinalStats();
-        }
-        setAttempts((prev) => {
-          const newAttempts = [...prev];
+      //trim to remove empty spaces from end of string
+      if (
+        event.target.value.trim().toLowerCase() ===
+        arr[index].toLocaleLowerCase()
+      ) {
+        timePassedRef.current[index] = Number(
+          (totalTimeRef.current - timeRef.current).toFixed(2)
+        );
+
+        setAttempts((prevAttempts) => {
+          const newAttempts = [...prevAttempts];
           newAttempts[index] += 1;
           return newAttempts;
         });
-        setNames((prev) => {
-          const newNames = [...prev];
-          newNames[index] = event.target.value;
-          return newNames;
-        });
-        if (index < inputRefs.current.length - 1) {
-          setCurrentInputIndex(index + 1);
+
+        if (currentInputIndex < inputRefs.current.length) {
+          setCurrentInputIndex(currentInputIndex + 1);
+          timeRef.current = totalTimeRef.current;
         }
       } else if (event.target.value !== "") {
-        event.target.value = "";
-        setAttempts((prev) => {
-          const newAttempts = [...prev];
+        nameRef.current[index].value = "";
+        setAttempts((prevAttempts) => {
+          const newAttempts = [...prevAttempts];
           newAttempts[index] += 1;
           return newAttempts;
         });
       }
-    }
-  };
-
-  const handleInputChange = (event, index) => {
-    const currentValue = event.target.value;
-    const newNames = [...names];
-    newNames[index] = currentValue;
-    setNames(newNames);
-  };
-
-  const handleInputClick = (index) => {
-    handleStart();
-    if (index === currentInputIndex) {
-      inputRefs.current[index].focus();
     }
   };
 
@@ -134,6 +119,7 @@ function Game({ showFinalStats, setCurUserFinalStats }) {
           href="https://earth.google.com/web/data=MicKJQojCiExdWxYODNWVkxBVnVZWUpfMk1KcWtDNE5RN2VyOEJjaUU6AwoBMA?authuser=0"
           target="blank"
           id="googleearth"
+          //onClick={()=>{setTimeout(()=>{startTimerRef.current=true},15*1000)}}
         >
           Start Exploring
         </a>
@@ -146,19 +132,19 @@ function Game({ showFinalStats, setCurUserFinalStats }) {
               className="attemptbox"
               type="text"
               placeholder={`Enter name ${index + 1}`}
-              value={names[index]}
-              onChange={(event) => handleInputChange(event, index)}
+              //value={names[index]}
               onKeyDown={(event) => handleKeyDown(event, index)}
-              onClick={() => handleInputClick(index)}
-              disabled={
-                index !== currentInputIndex
-                // ||
-                // (index > 0 && names[index - 1] !== arr[index])
-              }
-              ref={(el) => (inputRefs.current[index] = el)}
+              //onClick={() => handleInputClick(index)}
+              disabled={index !== currentInputIndex}
+              //here el holds reference to current html element
+              ref={(el) => {
+                console.log(`html element ${index}`, el);
+                nameRef.current[index] = el;
+                inputRefs.current[index] = el;
+              }}
             />
             <p>Attempts: {attempts[index]}</p>
-            <p>Time: {timePassed[index]}</p>
+            <p>Time: {timePassedRef.current[index]}</p>
           </div>
         ))}
       </div>
