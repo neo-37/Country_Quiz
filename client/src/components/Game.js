@@ -52,7 +52,7 @@ function Game({ showFinalStats, setCurUserFinalStats }) {
     console.log("attempts", attempts);
     //this is how we can make use of async await inside function which directly don't support them
     const send_and_show_stats = async () => {
-      if (currentInputIndex === 2) {
+      if (currentInputIndex === 12) {
         await send_user_stats(); //without await here rank 1 is shown as rank zero as finals stats need this data to match from database,then update and show
         showFinalStats();
       }
