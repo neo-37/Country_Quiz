@@ -33,9 +33,9 @@ function Navbar({ verified, loggedin, setVerified, setloggedin }) {
         <div className="container-fluid">
           <h1
             className="navbar-brand"
-            style={{ fontFamily: "Oswald, sans-serif", fontSize: "35px" }}
+            style={{ fontFamily: "Oswald, sans-serif",fontWeight:"600", fontSize: "35px" }}
           >
-            🗺️🔍
+             🗺️🔍
           </h1>
 
           <button

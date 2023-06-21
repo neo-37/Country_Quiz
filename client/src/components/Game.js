@@ -40,7 +40,6 @@ function Game({ showFinalStats, setCurUserFinalStats }) {
   useEffect(() => {
     // setinterval returns an id of the timer so that we can use the id to stop it after we are done
     const intervalId = setInterval(() => {
-      //c hold he the value of totalTime,using totalTime in set state is not suggested
       totalTimeRef.current = totalTimeRef.current + 0.01;
     }, 10);
     return () => clearInterval(intervalId); //cleanup function provided by useEffect can be used to clear the timer with the help of clearInteval method

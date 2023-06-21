@@ -6,7 +6,7 @@ function Home({ loggedin }) {
       <div className="container">
         <i className="fas fa-key fa-6x"></i>
         <h1 className="display-3" style={{ fontWeight: "400" }}>
-          Country Quiz
+          QuizWiz
         </h1>
         <p className="lead" style={{ fontWeight: "400" }}>
           Jump into the mystery map and let the adventure begin!
