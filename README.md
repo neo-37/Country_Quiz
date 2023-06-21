@@ -1,2 +1,4 @@
-# country_quiz
-![image](https://github.com/neo-37/country_quiz/assets/85379575/6d0abf83-a379-46bc-8e25-d674cf9337a4)
+# QuizWiz
+![image](https://github.com/neo-37/country_quiz/assets/85379575/16ffa611-c7fc-420c-ad63-03aa32dd7c54)
+
+
